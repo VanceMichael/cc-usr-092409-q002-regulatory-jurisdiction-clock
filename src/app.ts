@@ -1,14 +1,10 @@
-import Fastify from "fastify";
-import { sql } from "kysely";
-import { openDatabase } from "./database.js";
+import Fastify, { type FastifyInstance } from "fastify";
+import { getContext, type Context } from "./db.js";
+import { registerRoutes } from "./routes.js";
 
-export function buildApp() {
+export function buildApp(ctx: Context = getContext()): FastifyInstance {
   const app = Fastify({ logger: false });
-  app.get("/health", async () => {
-    const database = openDatabase();
-    await sql`SELECT 1`.execute(database);
-    await database.destroy();
-    return { status: "ok" };
-  });
+  app.get("/health", async () => ({ status: "ok" }));
+  registerRoutes(app, ctx);
   return app;
 }
